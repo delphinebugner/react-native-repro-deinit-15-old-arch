@@ -16,7 +16,36 @@ Run the example app to see it on action:
 5. Do the same on iOS 15.5: **the log does not appear anymore** on Screen2 pop!
    ![No deallocation log on screen pop](doc/demoNoLogiOS15.gif)
 
-In the real project, it's not a simple log in the deinit function but important clean up function for a native video player, so it's important to enter it!
+6. Apply the following patch on RNScreens: 
+```diff
+diff --git a/node_modules/react-native-screens/ios/RNSScreen.mm b/node_modules/react-native-screens/ios/RNSScreen.mm
+index 4b24cff..7e0718d 100644
+--- a/node_modules/react-native-screens/ios/RNSScreen.mm
++++ b/node_modules/react-native-screens/ios/RNSScreen.mm
+@@ -609,8 +609,9 @@ - (void)updatePresentationStyle
+ #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && defined(__IPHONE_15_0) && \
+     __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_15_0
+   if (@available(iOS 15.0, *)) {
+-    UISheetPresentationController *sheet = _controller.sheetPresentationController;
+-    if (_stackPresentation == RNSScreenStackPresentationFormSheet && sheet != nil) {
++    if (_stackPresentation == RNSScreenStackPresentationFormSheet) {
++      UISheetPresentationController *sheet = _controller.sheetPresentationController;
++      if (sheet != nil) {
+       sheet.prefersScrollingExpandsWhenScrolledToEdge = _sheetExpandsWhenScrolledToEdge;
+       sheet.prefersGrabberVisible = _sheetGrabberVisible;
+       sheet.preferredCornerRadius =
+@@ -646,6 +647,7 @@ - (void)updatePresentationStyle
+       } else {
+         RCTLogError(@"Unhandled value of sheetAllowedDetents passed");
+       }
++      }
+     }
+   }
+
+```
+The deallocation log is back on screen pop on iOS 15.5! 
+
+> In the real project, it's not a log in the deinit function but an important clean up function for a native video player, so we should enter it!
 
 ## Usage
 
