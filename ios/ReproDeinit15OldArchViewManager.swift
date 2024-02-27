@@ -11,6 +11,10 @@ class ReproDeinit15OldArchViewManager: RCTViewManager {
 }
 
 class ReproDeinit15OldArchView : UIView {
+  
+  deinit {
+    print("I deallocated the component wisely")
+  }
 
   @objc var color: String = "" {
     didSet {
